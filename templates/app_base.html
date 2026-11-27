@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-mark">AI</span> Resume Analyzer</a>
+    <nav class="side-nav">
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if active == 'dashboard' }}"><span>▦</span> Dashboard</a>
+      <a href="{{ url_for('analyze') }}" class="{{ 'active' if active == 'analyze' }}"><span>＋</span> New analysis</a>
+      <a href="{{ url_for('history') }}" class="{{ 'active' if active == 'history' }}"><span>☰</span> History</a>
+    </nav>
+    <div class="side-foot">
+      <div class="user-chip"><span class="avatar">{{ user[:1]|upper }}</span><span>{{ user }}</span></div>
+      <a class="logout" href="{{ url_for('logout') }}">Log out</a>
+    </div>
+  </aside>
+  <main class="main">
+    {% include "_flash.html" %}
+    {% block page %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

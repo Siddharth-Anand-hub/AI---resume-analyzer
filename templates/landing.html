@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .landing-page {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .landing-header {
+        padding: 20px 0;
+        text-align: center;
+        color: white;
+    }
+
+    .landing-header h1 {
+        font-size: 2.5em;
+        margin: 20px 0 10px 0;
+        font-weight: 700;
+    }
+
+    .landing-header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+    }
+
+    .landing-hero {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: white;
+        padding: 60px 20px;
+    }
+
+    .landing-hero h2 {
+        font-size: 3em;
+        margin-bottom: 20px;
+        font-weight: 700;
+    }
+
+    .landing-hero p {
+        font-size: 1.3em;
+        margin-bottom: 40px;
+        opacity: 0.95;
+        max-width: 600px;
+    }
+
+    .cta-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary {
+        background: white;
+        color: #667eea;
+        padding: 14px 40px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1em;
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: white;
+        padding: 14px 40px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1em;
+        border: 2px solid white;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        background: white;
+        color: #667eea;
+    }
+
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        padding: 60px 20px;
+        background: white;
+        max-width: 1200px;
+        margin: 40px auto;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card {
+        text-align: center;
+        padding: 30px;
+    }
+
+    .feature-icon {
+        font-size: 3em;
+        margin-bottom: 15px;
+    }
+
+    .feature-card h3 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 1.3em;
+    }
+
+    .feature-card p {
+        color: #666;
+        line-height: 1.6;
+    }
+</style>
+
+<div class="landing-page">
+    <div class="landing-header">
+        <h1>🚀 AI Resume Analyzer</h1>
+        <p>Powered by Advanced AI Technology</p>
+    </div>
+
+    <div class="landing-hero">
+        <h2>Optimize Your Resume with AI</h2>
+        <p>Get intelligent feedback on your resume and improve your chances of landing your dream job</p>
+        <div class="cta-buttons">
+            <a href="/signup" class="btn-primary">Get Started</a>
+            <a href="/login" class="btn-secondary">Login</a>
+        </div>
+    </div>
+
+    <div style="padding: 0 20px;">
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>AI Analysis</h3>
+                <p>Advanced AI analyzes your resume for improvements in structure, content, and impact</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💡</div>
+                <h3>Smart Suggestions</h3>
+                <p>Get actionable recommendations to make your resume stand out to recruiters</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3>Track History</h3>
+                <p>Keep track of all your resume analyses and improvements over time</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Secure & Private</h3>
+                <p>Your resume data is encrypted and secure with our advanced protection</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

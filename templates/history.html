@@ -1,0 +1,43 @@
+{% extends "app_base.html" %}
+{% block title %}History · AI Resume Analyzer{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div><h1>History</h1><p class="muted">{{ items|length }} saved analys{{ 'is' if items|length == 1 else 'es' }}</p></div>
+  <a class="btn" href="{{ url_for('analyze') }}">＋ New analysis</a>
+</div>
+
+{% if not items %}
+<div class="card empty"><div class="empty-icon">🗂️</div><h3>Nothing here yet</h3><p class="muted">Your analyses will be saved automatically.</p><a class="btn" href="{{ url_for('analyze') }}">Analyze a resume</a></div>
+{% else %}
+<input type="search" id="filter" class="search" placeholder="Filter by role…">
+<div class="history-grid" id="history-grid">
+  {% for i in items %}
+  <div class="card hist" data-goal="{{ i.goal|lower }}">
+    <div class="row-between">
+      {% if i.score is not none %}<span class="badge {{ score_class(i.score) }}">{{ i.score }}/100</span>{% else %}<span class="badge na">Older report</span>{% endif %}
+      <small class="muted">{{ i.date|fmt_date }}</small>
+    </div>
+    <h3>{{ i.goal }}</h3>
+    <p class="muted small">{{ i.verdict or 'Saved before scoring was added' }}{% if i.match is not none %} · {{ i.match }}% role match{% endif %}</p>
+    <div class="chips">
+      {% for s in i.skills[:5] %}<span class="chip ok">{{ s }}</span>{% endfor %}
+      {% if i.skills|length > 5 %}<span class="chip">+{{ i.skills|length - 5 }}</span>{% endif %}
+    </div>
+    <div class="row-between actions">
+      <a class="btn btn-sm" href="{{ url_for('report', report_id=i.id) }}">Open report</a>
+      <form method="POST" action="{{ url_for('delete_report', report_id=i.id) }}" onsubmit="return confirm('Delete this report?')">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button type="submit" class="btn-link danger">Delete</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<script>
+  document.getElementById('filter').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll('#history-grid .hist').forEach(c => c.style.display = c.dataset.goal.includes(q) ? '' : 'none');
+  });
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends "app_base.html" %}
+{% block title %}Report · AI Resume Analyzer{% endblock %}
+{% block page %}
+<div class="page-head no-print-gap">
+  <div>
+    <a class="back" href="{{ url_for('history') }}">← History</a>
+    <h1>{{ goal }}</h1>
+    <p class="muted">Analysed {{ report.created_at|fmt_date }}{% if r.role %} · compared with the <strong>{{ r.role }}</strong> profile{% endif %}</p>
+  </div>
+  <div class="head-actions no-print">
+    <button class="btn btn-ghost" onclick="window.print()">Print / save PDF</button>
+    <a class="btn" href="{{ url_for('analyze') }}">＋ New analysis</a>
+  </div>
+</div>
+
+{% if r.error %}<div class="flash error">{{ r.error }}</div>{% endif %}
+
+{% if legacy %}
+<div class="flash info">This report was saved before scoring and dashboards were added, so only the basic lists are available. Run a new analysis for the full report.</div>
+<div class="grid-2">
+  <div class="card"><h3>Skills</h3><div class="chips">{% for s in r.get('skills', []) %}<span class="chip ok">{{ s }}</span>{% endfor %}</div></div>
+  <div class="card"><h3>Missing skills</h3><div class="chips">{% for s in r.get('missing_skills', []) %}<span class="chip miss">{{ s }}</span>{% endfor %}</div></div>
+</div>
+<div class="card"><h3>Roadmap</h3><ul>{% for s in r.get('roadmap', []) %}<li>{{ s }}</li>{% endfor %}</ul></div>
+<div class="card"><h3>Interview questions</h3><ol>{% for s in r.get('interview_questions', []) %}<li>{{ s }}</li>{% endfor %}</ol></div>
+{% else %}
+
+{% set sc = r.score %}
+<section class="card hero">
+  <div class="ring {{ score_class(sc) }}">
+    <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" class="ring-bg"/><circle cx="60" cy="60" r="52" class="ring-fg" style="stroke-dasharray: {{ (sc / 100 * 326.7)|round(1) }} 326.7"/></svg>
+    <span>{{ sc }}<small>/100</small></span>
+  </div>
+  <div class="hero-text">
+    <span class="badge {{ score_class(sc) }}">{{ r.verdict }}</span>
+    <span class="pill {{ 'pill-ai' if r.source == 'ai' else '' }}">{{ 'AI-enhanced' if r.source == 'ai' else 'Built-in analysis' }}</span>
+    <p class="lead">{{ r.summary }}</p>
+    <div class="facts">
+      <div><b>{{ r.match_percent }}%</b><span>role skill match</span></div>
+      <div><b>{{ r.stats.years_experience }}</b><span>yrs experience</span></div>
+      <div><b>{{ r.stats.quantified }}</b><span>measurable results</span></div>
+      <div><b>{{ r.stats.words }}</b><span>words</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="grid-2">
+  <div class="card">
+    <h3>Score breakdown</h3>
+    {% for b in r.score_breakdown %}
+    {% set pct = (b.score / b.max * 100)|round|int %}
+    <div class="bar-row wide"><span>{{ b.label }}</span><div class="bar {{ 'good' if pct >= 70 else 'mid' if pct >= 45 else 'low' }}"><i style="width: {{ pct }}%"></i></div><b>{{ b.score }}/{{ b.max }}</b></div>
+    {% endfor %}
+    <p class="muted small">Level detected: {{ r.stats.level }} · Education: {{ r.stats.education }}</p>
+  </div>
+  <div class="card">
+    <h3>ATS &amp; completeness checks</h3>
+    <ul class="checks">
+      {% for c in r.ats_checks %}<li class="{{ 'ok' if c.ok else 'no' }}"><span>{{ '✓' if c.ok else '✕' }}</span>{{ c.label }}</li>{% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="card">
+  <h3>Skills needed for {{ r.role }}</h3>
+  <div class="chips">
+    {% for s in r.role_skills %}
+    <span class="chip {{ 'ok' if s.found else 'miss' }}" title="{{ ['','Nice to have','Important','Critical'][s.weight] }}">{{ '✓' if s.found else '✕' }} {{ s.skill }} <i class="w w{{ s.weight }}"></i></span>
+    {% endfor %}
+  </div>
+  <p class="muted small">Green = found in your resume · Red = missing · dots show how important the skill is for this role (3 = critical).</p>
+  {% if r.skill_categories %}
+  <h4>All skills found, by category</h4>
+  {% set biggest = r.skill_categories[0].count %}
+  {% for c in r.skill_categories %}
+  <div class="bar-row wide"><span>{{ c.name }}</span><div class="bar"><i style="width: {{ (c.count / biggest * 100)|round|int }}%"></i></div><b>{{ c.count }}</b></div>
+  <div class="chips tight">{% for s in c.skills %}<span class="chip">{{ s }}</span>{% endfor %}</div>
+  {% endfor %}
+  {% endif %}
+</section>
+
+<section class="grid-2">
+  <div class="card">
+    <h3>Strengths</h3>
+    <ul class="plain good">{% for s in r.strengths %}<li>{{ s }}</li>{% endfor %}</ul>
+  </div>
+  <div class="card">
+    <h3>What to fix first</h3>
+    {% for i in r.improvements %}
+    <div class="improve {{ i.priority|lower }}">
+      <span class="badge prio">{{ i.priority }}</span>
+      <div><strong>{{ i.title }}</strong><p class="muted small">{{ i.detail }}</p></div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <h3>Learning roadmap</h3>
+  {% if r.roadmap_detailed %}
+  <ol class="timeline">
+    {% for s in r.roadmap_detailed %}
+    <li>
+      <div class="row-between"><strong>{{ s.skill }}</strong><span class="muted small">{{ s.priority }} · ~{{ s.weeks }} week{{ 's' if s.weeks != 1 }}</span></div>
+      <p class="muted">{{ s.action }}</p>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}<p class="muted">No skill gaps found for this role. Focus on depth, measurable results and tailoring to each job post.</p>{% endif %}
+</section>
+
+<section class="card">
+  <h3>Interview questions based on your resume</h3>
+  <ol class="questions">{% for q in r.interview_questions %}<li>{{ q }}</li>{% endfor %}</ol>
+</section>
+{% endif %}
+
+<details class="card no-print">
+  <summary>Resume text that was analysed</summary>
+  <pre class="resume-text">{{ report.resume_text }}</pre>
+</details>
+{% endblock %}

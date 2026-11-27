@@ -1,0 +1,49 @@
+{% extends "app_base.html" %}
+{% block title %}New analysis · AI Resume Analyzer{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>New analysis</h1>
+    <p class="muted">Upload or paste a resume and tell us the role you want. Every score and tip is based on what the resume actually contains.</p>
+  </div>
+  <span class="pill {{ 'pill-ai' if ai_enabled() else '' }}">{{ 'AI-enhanced mode' if ai_enabled() else 'Built-in analysis mode' }}</span>
+</div>
+
+<form method="POST" enctype="multipart/form-data" class="card form-card" id="analyze-form">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+  <label class="field">
+    <span>Target role</span>
+    <input type="text" name="goal" list="roles" value="{{ goal }}" placeholder="e.g. Backend Developer, Data Analyst, UX Designer" required>
+    <datalist id="roles">
+      {% for r in role_names %}<option value="{{ r }}">{% endfor %}
+    </datalist>
+  </label>
+
+  <div class="field">
+    <span>Resume file <em>(PDF, DOCX or TXT, up to 5 MB)</em></span>
+    <label class="dropzone" id="dropzone">
+      <input type="file" name="file" id="file" accept=".pdf,.docx,.txt">
+      <strong id="file-label">Click to choose a file</strong>
+      <small>or paste the text below</small>
+    </label>
+  </div>
+
+  <label class="field">
+    <span>Or paste resume text</span>
+    <textarea name="resume" placeholder="Paste your full resume here…">{{ resume }}</textarea>
+  </label>
+
+  <button type="submit" class="btn btn-lg" id="submit-btn">Analyze resume</button>
+</form>
+
+<script>
+  const fileInput = document.getElementById('file');
+  fileInput.addEventListener('change', () => {
+    document.getElementById('file-label').textContent = fileInput.files.length ? fileInput.files[0].name : 'Click to choose a file';
+  });
+  document.getElementById('analyze-form').addEventListener('submit', () => {
+    const b = document.getElementById('submit-btn'); b.textContent = 'Analyzing…'; b.classList.add('busy');
+  });
+</script>
+{% endblock %}

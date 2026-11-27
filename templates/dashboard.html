@@ -1,0 +1,105 @@
+{% extends "app_base.html" %}
+{% block title %}Dashboard · AI Resume Analyzer{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>Welcome back, {{ user }}</h1>
+    <p class="muted">Here is how your resumes are performing.</p>
+  </div>
+  <a class="btn" href="{{ url_for('analyze') }}">＋ New analysis</a>
+</div>
+
+{% if stats.total == 0 %}
+<div class="card empty">
+  <div class="empty-icon">📄</div>
+  <h3>No analyses yet</h3>
+  <p class="muted">Run your first analysis to unlock your score, skill gaps, learning roadmap and interview questions.</p>
+  <a class="btn" href="{{ url_for('analyze') }}">Analyze a resume</a>
+</div>
+{% else %}
+
+<section class="stat-grid">
+  <div class="stat"><span class="stat-label">Analyses</span><span class="stat-value">{{ stats.total }}</span></div>
+  <div class="stat"><span class="stat-label">Average score</span><span class="stat-value">{{ stats.average if stats.average is not none else '—' }}</span></div>
+  <div class="stat"><span class="stat-label">Best score</span><span class="stat-value">{{ stats.best if stats.best is not none else '—' }}</span></div>
+  <div class="stat">
+    <span class="stat-label">Latest score</span>
+    <span class="stat-value">{{ stats.latest if stats.latest is not none else '—' }}
+      {% if stats.change is not none %}<small class="delta {{ 'up' if stats.change >= 0 else 'down' }}">{{ '▲' if stats.change >= 0 else '▼' }} {{ stats.change|abs }}</small>{% endif %}
+    </span>
+  </div>
+</section>
+
+<section class="grid-2">
+  <div class="card">
+    <h3>Score trend</h3>
+    {% if points|length >= 1 %}
+    <svg viewBox="0 0 {{ chart.w }} {{ chart.h }}" class="trend" role="img" aria-label="Score trend">
+      {% for g in (0, 25, 50, 75, 100) %}
+      {% set gy = chart.h - chart.pad - (g / 100) * (chart.h - 2 * chart.pad) %}
+      <line x1="{{ chart.pad }}" x2="{{ chart.w - chart.pad }}" y1="{{ gy }}" y2="{{ gy }}" class="grid"/>
+      <text x="2" y="{{ gy + 4 }}" class="axis">{{ g }}</text>
+      {% endfor %}
+      {% if points|length > 1 %}<polyline points="{{ polyline }}" class="line"/>{% endif %}
+      {% for p in points %}
+      <circle cx="{{ p.x }}" cy="{{ p.y }}" r="5" class="dot"><title>{{ p.label }}: {{ p.score }}</title></circle>
+      <text x="{{ p.x }}" y="{{ p.y - 10 }}" class="pt" text-anchor="middle">{{ p.score }}</text>
+      {% endfor %}
+    </svg>
+    {% else %}<p class="muted">Scores will appear here after your next analysis.</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Latest analysis</h3>
+    {% if latest %}
+    <div class="mini-report">
+      {% set sc = latest.score %}
+      <div class="ring ring-sm {{ score_class(sc) }}">
+        <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" class="ring-bg"/><circle cx="60" cy="60" r="52" class="ring-fg" style="stroke-dasharray: {{ (sc / 100 * 326.7)|round(1) }} 326.7"/></svg>
+        <span>{{ sc }}</span>
+      </div>
+      <div>
+        <p class="strong">{{ latest.role }}</p>
+        <span class="badge {{ score_class(sc) }}">{{ latest.verdict }}</span>
+        <p class="muted small">{{ latest.summary }}</p>
+        <a href="{{ url_for('report', report_id=latest_id) }}">Open full report →</a>
+      </div>
+    </div>
+    {% else %}<p class="muted">Your latest report was created before scoring existed. <a href="{{ url_for('analyze') }}">Run a new analysis</a> to get a score.</p>{% endif %}
+  </div>
+</section>
+
+<section class="grid-2">
+  <div class="card">
+    <h3>Your most common skills</h3>
+    {% for s in top_skills %}
+    <div class="bar-row"><span>{{ s.name }}</span><div class="bar"><i style="width: {{ s.pct }}%"></i></div><b>{{ s.count }}</b></div>
+    {% else %}<p class="muted">No data yet.</p>{% endfor %}
+  </div>
+  <div class="card">
+    <h3>Skills you keep missing</h3>
+    {% for s in top_missing %}
+    <div class="bar-row"><span>{{ s.name }}</span><div class="bar warn"><i style="width: {{ s.pct }}%"></i></div><b>{{ s.count }}</b></div>
+    {% else %}<p class="muted">No gaps found. 🎉</p>{% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <div class="row-between"><h3>Recent analyses</h3><a href="{{ url_for('history') }}">View all →</a></div>
+  <table class="table">
+    <thead><tr><th>Target role</th><th>Score</th><th>Match</th><th>Date</th><th></th></tr></thead>
+    <tbody>
+      {% for i in recent %}
+      <tr>
+        <td><strong>{{ i.goal }}</strong>{% if i.role and i.role != i.goal %}<br><small class="muted">Profile: {{ i.role }}</small>{% endif %}</td>
+        <td>{% if i.score is not none %}<span class="badge {{ score_class(i.score) }}">{{ i.score }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td>{{ i.match ~ '%' if i.match is not none else '—' }}</td>
+        <td class="muted">{{ i.date|fmt_date }}</td>
+        <td><a href="{{ url_for('report', report_id=i.id) }}">Open</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}
