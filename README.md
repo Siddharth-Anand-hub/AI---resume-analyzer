@@ -1,42 +1,33 @@
-# AI Resume Analyzer
+# 🚀 AI Resume Analyzer
 
-A Flask web app that scores a resume against a target role and gives feedback that is specific to that resume.
+A Flask web app that scores a resume against a target role and gives feedback
+specific to that resume: not generic, copy-paste advice.
 
-## What's new
-- **Resume-driven analysis.** Scores, skills, gaps, fixes, roadmap and interview questions are computed from the actual resume text (sections, contact info, experience years, quantified results, action verbs, filler phrases, 94 skills across 14 role profiles). Different resumes now produce different reports.
-- **Works with or without OpenAI.** The built-in engine always runs. If `OPENAI_API_KEY` is set, the AI rewrites the summary, advice, roadmap and questions on top of those facts. If the API fails, the built-in result is shown with a notice.
-- **Dashboard** with score trend, stats, most common skills, most missed skills and recent analyses.
-- **Full report page** with score ring, score breakdown, ATS checklist, role-skill match, strengths, prioritised fixes, learning roadmap, interview questions, print/PDF.
-- **History** with search, delete and links to every report. Old reports still open.
-- **Security fixes:** hashed passwords (old plain-text passwords are upgraded on first login), CSRF protection, secret key from the environment, per-user report access, upload size limit.
+## ✨ Features
+- **Resume-driven scoring (0–100):** skill match, experience, impact, ATS structure and completeness
+- **14 role profiles, 94 skills:** Backend, Frontend, Data Analyst, ML Engineer, DevOps, UX, and more
+- **Skill-gap analysis** with weighted role requirements
+- **Learning roadmap** with concrete project ideas and time estimates
+- **Personalised interview questions** based on your own projects and skills
+- **Dashboard:** score trend, top skills, most-missed skills, recent analyses
+- **Report history:** search, reopen, delete, print or save as PDF
+- **PDF / DOCX / TXT upload** or paste text
+- **Optional OpenAI mode:** works fully offline without an API key
 
-## Run
-```bash
-python -m venv .venv
-.venv\Scripts\activate          # Windows   (Linux/Mac: source .venv/bin/activate)
-pip install -r requirements.txt
-python app.py                   # http://localhost:5000
-```
+## 🛠 Tech Stack
+Flask · SQLAlchemy · SQLite · PyPDF2 · python-docx · Waitress · OpenAI API (optional)
 
-Optional environment variables:
-```
-SECRET_KEY=any-long-random-string     # keeps logins valid across restarts
-OPENAI_API_KEY=sk-...                 # enables AI-enhanced mode
-OPENAI_MODEL=gpt-4o-mini              # default
-DATABASE_URL=sqlite:///ai_resume_analyser.db
-```
+## ⚙️ Quick Start
+    git clone <your-repo-url>
+    cd AI_resume_analyser
+    python -m venv .venv && .venv\Scripts\activate
+    pip install -r requirements.txt
+    python app.py        # http://localhost:5000
 
-The existing SQLite database is upgraded automatically on start (new `goal`, `score`, `created_at` columns).
+Optional environment variables: `SECRET_KEY`, `OPENAI_API_KEY`, `OPENAI_MODEL`, `DATABASE_URL`
 
-## Structure
-```
-app.py          routes: auth, dashboard, analyze, report, history
-ai.py           analysis engine (local scoring + optional OpenAI layer)
-models.py db.py SQLAlchemy models and automatic schema upgrade
-templates/      base, app_base (sidebar), dashboard, analyze, report, history, auth
-static/style.css
-test_ai.py      unit tests  ->  python -m unittest test_ai
-```
+## 🔒 Security
+Hashed passwords, CSRF protection, per-user report access, upload size limits.
 
-## Adding roles or skills
-Edit `ROLES` and `SKILLS` at the top of `ai.py`. Each role lists its skills with a weight (3 critical, 2 important, 1 nice to have).
+## 🧪 Tests
+    python -m unittest test_ai
